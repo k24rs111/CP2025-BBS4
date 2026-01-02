@@ -162,6 +162,10 @@ function canEditPost(post) {
 // 投稿のHTML要素を生成
 // 　バグ入りなので要修正（編集・削除機能表示判定が誤っている）
 function createPostElement(post) {
+    const liked = currentUser &&
+        post.likedUsers &&
+        post.likedUsers[currentUser.uid];
+
     // 編集権限を確認
     const canEdit = canEditPost(post);
     // 編集権限があれば、編集・削除機能を表示
@@ -173,6 +177,18 @@ function createPostElement(post) {
             <button class="btn-delete" onclick="deletePost('${post.id}')">
                 削除
             </button>
+            <div class="post-likes">
+                 ${currentUser ? `
+                      <button class="btn-like ${liked ? 'liked' : ''}"
+                          onclick="toggleLike('${post.id}')">
+                          👍 いいね
+                       </button>
+                  ` : ''}
+
+                  <span class="like-count">
+                       ${post.likes || 0}
+                  </span>
+            </div>
         </div>
     ` : '';
 
@@ -375,6 +391,34 @@ function deletePost(postId) {
     currentEditId = postId;
     showModal('deleteModal');
 }
+
+// いいねのON/OFF
+function toggleLike(postId) {
+    if (!currentUser) {
+        showMessage('いいねするにはログインが必要です', 'error');
+        return;
+    }
+
+    const postRef = postsRef.child(postId);
+    const uid = currentUser.uid;
+
+    postRef.transaction((post) => {
+        if (!post) return post;
+
+        if (!post.likes) post.likes = 0;
+        if (!post.likedUsers) post.likedUsers = {};
+
+        if (post.likedUsers[uid]) {
+            post.likes--;
+            delete post.likedUsers[uid];
+        } else {
+            post.likes++;
+            post.likedUsers[uid] = true;
+        }
+        return post;
+    });
+}
+
 
 // 更新時のアニメーション
 function animateUpdate(postId) {
