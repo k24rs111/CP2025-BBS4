@@ -507,3 +507,24 @@ textarea.form-control {
 .logged-out {
     display: none;
 }
+
+/* いいね機能 */
+.post-likes {
+    margin-top: 6px;
+}
+
+.btn-like {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-like.liked {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.like-count {
+    margin-left: 4px;
+}
